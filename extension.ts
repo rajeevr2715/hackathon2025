@@ -24,7 +24,21 @@ export function activate(context: vscode.ExtensionContext) {
             environmentDriftCheck(output);
             commitDriftCheck(output);
             branchConfigDriftCheck(output);
-			
+			const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+			const api = gitExtension.getAPI(1);
+
+			// Print Repository URL
+			output.appendLine("\n=== Repository Info ===");
+
+			if (api.repositories.length > 0) {
+				const repo = api.repositories[0];
+				const origin = repo.state.remotes.find((r: { name: string; }) => r.name === "origin");
+
+				const repoUrl = origin?.fetchUrl || "No remote origin found";
+				output.appendLine(`📁 Repo URL: ${repoUrl}`);
+			} else {
+				output.appendLine("⚠ No Git repository found.");
+			}
             output.appendLine("=== Validation Completed ===");
             output.show(true);
 
